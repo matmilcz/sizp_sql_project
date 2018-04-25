@@ -14,8 +14,9 @@ int MainWindow::LoginAttempt()  // 1-zalogowano, 0-nie zalogowano
     {
         QSqlQuery query;
 
-        QString login_str = "def";
-        QString passwd_str = "def";
+        QString login_str = "";
+        QString passwd_str = "";
+
 
         if(query.exec("select * from users"))
         {
@@ -28,6 +29,9 @@ int MainWindow::LoginAttempt()  // 1-zalogowano, 0-nie zalogowano
                  {
                      // zalogowanie
                      QString email_str = query.value(query.record().indexOf("email")).toString(); // odczytaj email
+                     QString name_str = query.value(query.record().indexOf("name")).toString(); // odczytaj email
+                     QString surname_str = query.value(query.record().indexOf("surname")).toString(); // odczytaj email
+                     QString adress_str = query.value(query.record().indexOf("adress")).toString(); // odczytaj email
 
                      query.prepare("select r.id from users u, roles r where u.role=r.id and u.login like '" + login_str + "'");
                      if(query.exec()) // znajdź poziom dostępu
@@ -35,7 +39,7 @@ int MainWindow::LoginAttempt()  // 1-zalogowano, 0-nie zalogowano
                          query.first();
                          int role = query.value(0).toInt();
 
-                         us->ChangeUser(login_str, email_str, role);
+                         us->ChangeUser(login_str, email_str, name_str, surname_str, adress_str,role);
                      }
                      else
                      {
@@ -141,7 +145,7 @@ void MainWindow::SQLError()
 
 void MainWindow::InitUserPanel()
 {
-    ui->LoginNameLabel->setText(us->getLogin());    // wyświetl nazwę użytkownika
+    ui->LoginNameLabel->setText(us->getName() + " " + us->getSurname());    // wyświetl nazwę użytkownika
 
     if(us->getRole() == 2) ui->AdminPanelPushButton->setVisible(true);  // pokaż przycisk panelu admina
     else ui->AdminPanelPushButton->setVisible(false);   // ukryj przycisk panelu admina

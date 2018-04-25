@@ -9,6 +9,7 @@
 #define CATEGORY_PAGE 0
 #define SUBCATEGORY_PAGE 1
 #define ITEMS_PAGE 2
+#define ITEM_PAGE 3
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete us;
     delete ui;
 }
 
@@ -109,7 +111,7 @@ void MainWindow::on_CategoryListWidget_itemClicked(QListWidgetItem *item)
 
 void MainWindow::on_LogOutPushButton_clicked()
 {
-    us->ChangeUser("Niezarejestrowany", "", 0); // wyloguj
+    us->ChangeUser("Niezarejestrowany", "", "", "", "", 0); // wyloguj
     ui->stackedWidget->setCurrentIndex(LOGIN_PAGE); // przejdź do strony logowania
 }
 
@@ -128,7 +130,7 @@ void MainWindow::on_SubcategoryListWidget_itemClicked(QListWidgetItem *item)
     {
         QSqlQuery query;
 
-        query.prepare("select * from subcategories where name = :name");
+        query.prepare("select id from subcategories where name = :name");
         query.bindValue(":name", item->text());
 
         if(query.exec())
@@ -144,13 +146,71 @@ void MainWindow::on_SubcategoryListWidget_itemClicked(QListWidgetItem *item)
     // Wypełnia listę przedmiotami
     QSqlQuery query;
 
-    query.prepare("select * from items i, item_category ic, categories c, subcategories s "
-                  "where i.id = ic.id_item and ic.id_category = c.id and ic.id_subcategory = s.id and ic.id_subcategory = :id");
-    // zrobić ładniejsze zapytanie
+    query.prepare("select it.name from items it, info inf, categories cat, subcategories subcat "
+                  "where it.id_info = inf.id and inf.id_category = cat.id and inf.id_subcategory = subcat.id and inf.id_subcategory = :id");
+                  // zrobić ładniejsze zapytanie
     query.bindValue(":id", id);
 
     FillListWidget(query, ui->ItemsListWidget);
+
+    db.close();
+
     ui->stackedWidget_2->setCurrentIndex(ITEMS_PAGE);
     ui->BackPushButton->setEnabled(true);
+}
+
+void MainWindow::on_ItemsListWidget_itemClicked(QListWidgetItem *item)
+{
+    // Znajduje id danego przedmiotu
+    int id;
+
+    if(db.open())
+    {
+        QSqlQuery query;
+
+        query.prepare("select id from items where name = :name");
+        query.bindValue(":name", item->text());
+
+        if(query.exec())
+        {
+            query.first();
+            id = query.value(0).toInt();
+        }
+        else SQLError();    // błąd wykonania zapytania
+    }
+    else SQLError();    // błąd otwarcia bazy danych
+    //
+
+    // Wyświetla przedmiot
+    QSqlQuery query;
+
+    query.prepare("select it.name, it.price, inf.model, inf.producent from items it, info inf "
+                  "where it.id_info = inf.id and it.id = :id");
+                  // zrobić ładniejsze zapytanie
+    query.bindValue(":id", id);
+
+    query.exec();
+
+    query.first();
+    QString nameLabel = query.value(query.record().indexOf("name")).toString();
+    int priceLabel = query.value(query.record().indexOf("price")).toInt();
+    QString modelLabel = query.value(query.record().indexOf("model")).toString();
+    QString producentLabel = query.value(query.record().indexOf("producent")).toString();
+
     db.close();
+
+    ui->ItemNameLabel->setText(nameLabel);
+    ui->ModelLabel->setText(modelLabel);
+    ui->ProducentLabel->setText(producentLabel);
+    ui->PriceLabel->setText(QString::number(priceLabel) + " PLN");
+
+    ui->stackedWidget_2->setCurrentIndex(ITEM_PAGE);
+    ui->BackPushButton->setEnabled(true);
+}
+
+void MainWindow::on_AdminPanelPushButton_clicked()
+{
+    adminwindow *w = new adminwindow;
+    w->show();
+    // wyciek pamięci?
 }
