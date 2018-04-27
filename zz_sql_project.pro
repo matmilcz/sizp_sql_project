@@ -28,7 +28,8 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     my_func.cpp \
-    adminwindow.cpp
+    adminwindow.cpp \
+    my_func_admin.cpp
 
 HEADERS += \
         mainwindow.h \

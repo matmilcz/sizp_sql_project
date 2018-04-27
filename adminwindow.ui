@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>602</width>
+    <height>426</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="MainPage">
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -128,7 +128,127 @@
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="EditItemsPage"/>
+     <widget class="QWidget" name="EditItemsPage">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QListWidget" name="DeleteItemsListWidget"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="DeleteItemPushButton">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Usuń przedmiot</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="NameLabel">
+             <property name="text">
+              <string>Nazwa przedmiotu:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="NameLineEdit"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="ProducentLabel">
+             <property name="text">
+              <string>Producent:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ProducentLineEdit"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="ModelLabel">
+             <property name="text">
+              <string>Model:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ModelLineEdit"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="PriceLabel">
+             <property name="text">
+              <string>Cena:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="PriceSpinBox"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="QuantityLabel">
+             <property name="text">
+              <string>Ilość w magazynie:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="QuantitySpinBox"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="CategoryLabel">
+             <property name="text">
+              <string>Kategoria:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="CategoryComboBox"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="SubcategoryLabel">
+             <property name="text">
+              <string>Podkategoria:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="SubcategoryComboBox"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="AddItemPushButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Dodaj przedmiot</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
