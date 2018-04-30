@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>602</width>
-    <height>426</height>
+    <width>663</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -93,9 +93,20 @@
         <rect>
          <x>10</x>
          <y>100</y>
-         <width>111</width>
-         <height>41</height>
+         <width>171</width>
+         <height>50</height>
         </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>Usuń użytkownika</string>
@@ -104,11 +115,22 @@
       <widget class="QPushButton" name="MakeAdminPushButton">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>100</y>
-         <width>111</width>
-         <height>41</height>
+         <x>10</x>
+         <y>160</y>
+         <width>171</width>
+         <height>50</height>
         </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>Podnieś uprawnienia</string>
@@ -133,25 +155,29 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QListWidget" name="DeleteItemsListWidget"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="DeleteItemPushButton">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>50</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Usuń przedmiot</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="QListWidget" name="ChooseItemsListWidget"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="DeleteItemPushButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Usuń przedmiot</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -226,22 +252,44 @@
             <widget class="QComboBox" name="SubcategoryComboBox"/>
            </item>
            <item>
-            <widget class="QPushButton" name="AddItemPushButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Dodaj przedmiot</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QPushButton" name="EditItemPushButton">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>50</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Edytuj przedmiot</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="AddItemPushButton">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>50</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Dodaj przedmiot</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>

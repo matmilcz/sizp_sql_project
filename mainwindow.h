@@ -72,6 +72,12 @@ private slots:
 
     void on_AdminPanelPushButton_clicked();
 
+    void on_SearchLineEdit_editingFinished();
+
+    void on_BuyPushButton_clicked();
+
+    void on_OrdersPushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -82,7 +88,13 @@ private:
     void FillListWidget(QSqlQuery, QListWidget *);
     int LoginAttempt();  // 1-zalogowano, 0-nie zalogowano
     void CreateNewAccount();
-    void SQLError();
+    void SQLError(QString s = "")
+    {
+        QMessageBox ErrMsg;
+        if(s.isEmpty()) ErrMsg.setText(db.lastError().text());
+        else ErrMsg.setText(s);
+        ErrMsg.exec();
+    }
     void InitUserPanel();
 
 };

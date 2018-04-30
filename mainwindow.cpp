@@ -213,5 +213,69 @@ void MainWindow::on_AdminPanelPushButton_clicked()
 {
     adminwindow *w = new adminwindow;
     w->show();
-    // wyciek pamięci?
+}
+
+void MainWindow::on_SearchLineEdit_editingFinished()
+{
+    if(db.open())
+    {
+        QSqlQuery query;
+
+        if(ui->SearchLineEdit->text() == "")
+        {
+            ui->stackedWidget_2->setCurrentIndex(CATEGORY_PAGE);
+            ui->BackPushButton->setEnabled(false);
+        }
+        else
+        {
+            query.prepare("select name from items where name like '%" + ui->SearchLineEdit->text() + "%'");
+            ui->stackedWidget_2->setCurrentIndex(ITEMS_PAGE);
+            FillListWidget(query, ui->ItemsListWidget);
+            ui->BackPushButton->setEnabled(true);
+        }
+
+        db.close();
+    }
+    else SQLError();
+}
+
+void MainWindow::on_BuyPushButton_clicked()
+{
+    if(db.open())
+    {
+        QSqlQuery query;
+
+        query.prepare("insert into orders values( "
+                      "(select id from users where login = '" + us->getLogin() + "'), "
+                      "(select id from items where name = '" + ui->ItemNameLabel->text() + "'), "
+                      "(select adress from users where login = '" + us->getLogin() + "'))");
+
+        if(query.exec())    // dodaj do zamówień
+        {
+            query.prepare("select w.quantity from warehouse w, items i where i.id = w.id_item and i.name = '" + ui->ItemNameLabel->text() + "'");
+
+            int q;
+            if(query.exec())    // znajdź obecną ilość przedmiotu w magazynie
+            {
+                query.first();
+                q = query.value(0).toInt() - 1;
+            }
+            else SQLError();
+
+            query.prepare("update warehouse set quantity = :q where id_item = (select name from items where name = '" + ui->ItemNameLabel->text() + "')");
+            query.bindValue(":q", q);
+            if(!query.exec()) SQLError();   // dekrementuj ilość
+
+            SQLError("Kupiono pomyślnie przedmiot");
+        }
+        else SQLError();
+
+        db.close();
+    }
+    else SQLError();
+}
+
+void MainWindow::on_OrdersPushButton_clicked()
+{
+
 }

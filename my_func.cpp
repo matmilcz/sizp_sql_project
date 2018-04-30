@@ -131,34 +131,40 @@ void MainWindow::FillListWidget(QSqlQuery query, QListWidget *w)
     if(query.exec())
     {
         w->clear();
-        while(query.next()) w->addItem(query.value(query.record().indexOf("name")).toString());
+        while(query.next())
+        {
+            QString name_str = query.value(query.record().indexOf("name")).toString();
+                    //price_str = query.value(query.record().indexOf("price")).toString();
+            //QString str = name_str + "      Cena: " + price_str;
+            w->addItem(name_str);
+        }
     }
     else SQLError();    // błąd wykonania zapytania
 }
 
-void MainWindow::SQLError()
-{
-    QMessageBox ErrMsg;
-    ErrMsg.setText(db.lastError().text());
-    ErrMsg.exec();
-}
 
 void MainWindow::InitUserPanel()
 {
     ui->LoginNameLabel->setText(us->getName() + " " + us->getSurname());    // wyświetl nazwę użytkownika
 
-    if(us->getRole() == 2) ui->AdminPanelPushButton->setVisible(true);  // pokaż przycisk panelu admina
-    else ui->AdminPanelPushButton->setVisible(false);   // ukryj przycisk panelu admina
+    if(us->getRole() == 2)
+    {
+        ui->AdminPanelPushButton->setVisible(true);  // pokaż przycisk panelu admina
+        ui->OrdersPushButton->setVisible(true);
+    }
+    else
+    {
+        ui->AdminPanelPushButton->setVisible(false);   // ukryj przycisk panelu admina
+        ui->OrdersPushButton->setVisible(false);
+    }
 
     if(us->getRole() > 0)
     {
         ui->BoughtPushButton->setVisible(true);
-        // jakieś inne rzeczy...
     }
     else
     {
         ui->BoughtPushButton->setVisible(false);
-        // jakieś inne rzeczy...
     }
 }
 

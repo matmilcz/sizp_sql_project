@@ -5,8 +5,25 @@
 #include <QString>
 #include <QMessageBox>
 #include <QtSql>
+#include <QListWidget>
 
 #include "adminwindow.h"
+
+void adminwindow::FillListWidget(QSqlQuery query, QListWidget *w)
+{
+    if(query.exec())
+    {
+        w->clear();
+        while(query.next())
+        {
+            QString name_str = query.value(query.record().indexOf("name")).toString();
+            //int price_str = query.value(query.record().indexOf("price")).toInt();
+            //QString str = name_str + "      Cena: " + QString::number(price_str);
+            w->addItem(name_str);
+        }
+    }
+    else SQLError();    // błąd wykonania zapytania
+}
 
 int adminwindow::AddModel(QString model_str, QString producent_str, QString category_str, QString subcategory_str)
 {
@@ -93,11 +110,8 @@ void adminwindow::ChangeQuantity(int id_item, int quantity)
         }
         else
         {
-            SQLError("coś jest");
-            int q = query.value(0).toInt();
-
             query.prepare("update warehouse set quantity = :q where id_item = :id");
-            query.bindValue(":q", q + quantity);
+            query.bindValue(":q", quantity);
             query.bindValue(":id", id_item);
 
             if(!query.exec()) SQLError();

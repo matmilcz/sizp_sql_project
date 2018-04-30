@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QtSql>
 #include <QMessageBox>
+#include <QListWidget>
 
 extern QSqlDatabase db;
 
@@ -34,6 +35,12 @@ private slots:
 
     void on_AddItemPushButton_clicked();
 
+    void on_DeleteItemPushButton_clicked();
+
+    void on_ChooseItemsListWidget_itemClicked(QListWidgetItem *item);
+
+    void on_EditItemPushButton_clicked();
+
 private:
     Ui::adminwindow *ui;
 
@@ -50,7 +57,7 @@ private:
     int AddModel(QString, QString, QString, QString);
     int AddItem(QString, int, int);
     void ChangeQuantity(int, int);
-
+    void FillListWidget(QSqlQuery, QListWidget *);
 
 };
 
