@@ -8,42 +8,14 @@
 #include <QListWidgetItem>
 
 #include "adminwindow.h"
+#include "orderswindow.h"
+#include "user.h"
 
 extern QSqlDatabase db;
 
 namespace Ui {
 class MainWindow;
 }
-
-class User
-{
-    QString login;
-    QString email;
-    QString name;
-    QString surname;
-    QString adress;
-    int role; // 0 - niezarejestrowany, 1 - zarejestrowany, 2 - admin
-
-public:
-    User(QString l = "Niezarejestrowany", QString e = "", QString n = "ADMIN", QString s = "", QString a = "", int r = 0)
-        : login(l), email(e), name(n), surname(s), adress(a), role(r) {}
-    void ChangeUser(QString l, QString e, QString n, QString s, QString a, int r)
-    {
-        login = l;
-        email = e;
-        name = n;
-        surname = s;
-        adress = a;
-        role = r;
-    }
-    QString getLogin() { return login; }
-    QString getEmail() { return email; }
-    QString getName() { return name; }
-    QString getSurname() { return surname; }
-    QString getAdress() { return adress; }
-    int getRole() { return role; }
-
-};
 
 class MainWindow : public QMainWindow
 {
@@ -60,15 +32,9 @@ private slots:
 
     void on_CreateAccountPushButton_clicked();
 
-    void on_CategoryListWidget_itemClicked(QListWidgetItem *item);
-
     void on_LogOutPushButton_clicked();
 
     void on_BackPushButton_clicked();
-
-    void on_SubcategoryListWidget_itemClicked(QListWidgetItem *item);
-
-    void on_ItemsListWidget_itemClicked(QListWidgetItem *item);
 
     void on_AdminPanelPushButton_clicked();
 
@@ -78,14 +44,22 @@ private slots:
 
     void on_OrdersPushButton_clicked();
 
+    void on_ItemsTreeView_clicked(const QModelIndex &index);
+
+    void on_SubcategoryListView_clicked(const QModelIndex &index);
+
+    void on_CategoryListView_clicked(const QModelIndex &index);
+
+    void on_BoughtPushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
-    // My items
+    // My stuff
     User *us;
+    QSqlQueryModel *qModelCategory, *qModelSubcategory, *qModelItems;
 
-    // My Functions
-    void FillListWidget(QSqlQuery, QListWidget *);
+
     int LoginAttempt();  // 1-zalogowano, 0-nie zalogowano
     void CreateNewAccount();
     void SQLError(QString s = "")
@@ -96,6 +70,9 @@ private:
         ErrMsg.exec();
     }
     void InitUserPanel();
+
+public:
+    QSqlDatabase db;
 
 };
 

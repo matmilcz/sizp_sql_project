@@ -44,7 +44,7 @@ private slots:
 private:
     Ui::adminwindow *ui;
 
-    // My Functions
+    // My Stuff
 
     void SQLError(QString s = "")
     {
@@ -58,6 +58,9 @@ private:
     int AddItem(QString, int, int);
     void ChangeQuantity(int, int);
     void FillListWidget(QSqlQuery, QListWidget *);
+
+public:
+
 
 };
 

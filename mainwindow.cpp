@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
-#include "my_func.cpp"
+#include "my_func_main.cpp"
 
 #define LOGIN_PAGE 0
 #define NEW_USER_PAGE 1
@@ -18,13 +17,35 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    us = new User();
+    QString ServerName = "LOCALHOST\\SQLEXPRESS";
+    QString DBName = "zz_sql_project";
+    QString dsn = QString("DRIVER={SQL Server};Server=%1;Database=%2;Trusted_Connection=Yes;").arg(ServerName).arg(DBName);
+
+    db = QSqlDatabase::addDatabase("QODBC3");
+    db.setConnectOptions();
+    db.setDatabaseName(dsn);
+
+    if(!db.open()) SQLError();  // otwórz połączenie z bazą danych
+
+    us = new User();    // nowy użytkownik
+
+    qModelCategory = new QSqlQueryModel;
+    ui->CategoryListView->setModel(qModelCategory);
+    qModelSubcategory = new QSqlQueryModel;
+    ui->SubcategoryListView->setModel(qModelSubcategory);
+    qModelItems = new QSqlQueryModel;
+    ui->ItemsTreeView->setModel(qModelItems);
 
     ui->stackedWidget->setCurrentIndex(LOGIN_PAGE); // przełącz na stronę logowania
 }
 
 MainWindow::~MainWindow()
 {
+    if(!db.isOpen()) db.close();
+
+    delete qModelCategory;
+    delete qModelSubcategory;
+    delete qModelItems;
     delete us;
     delete ui;
 }
@@ -42,72 +63,19 @@ void MainWindow::on_LoginPushButton_clicked()
 
         InitUserPanel();    // zainicjalizuj panel użytkownika
 
+        qModelCategory->setQuery("select name from categories");
 
-        if(db.open())
-        {
-            QSqlQuery query;
-
-            query.prepare("select * from categories");
-
-            FillListWidget(query, ui->CategoryListWidget);
-            ui->stackedWidget_2->setCurrentIndex(CATEGORY_PAGE);
-            db.close();
-
-            ui->BackPushButton->setEnabled(false);
-        }
-        else SQLError();
+        ui->stackedWidget_2->setCurrentIndex(CATEGORY_PAGE);
+        ui->BackPushButton->setEnabled(false);
     }
-    else
-    {
-        QMessageBox ErrMsg;
-        ErrMsg.setText("Błędny login lub hasło");
-        ErrMsg.exec();
-    }
+    else SQLError("Błędny login lub hasło");
 }
 
 void MainWindow::on_CreateAccountPushButton_clicked()
 {
-    // { TODO: Dodawanie użytkownika
-
     CreateNewAccount();
 
-    // }
-
     ui->stackedWidget->setCurrentIndex(LOGIN_PAGE); // po założeniu konta - przełącz na stronę logowania
-}
-
-void MainWindow::on_CategoryListWidget_itemClicked(QListWidgetItem *item)
-{
-    // Znajduje id danej kategorii
-    int id;
-
-    if(db.open())
-    {
-        QSqlQuery query;
-
-        query.prepare("select * from categories where name = :name");
-        query.bindValue(":name", item->text());
-
-        if(query.exec())
-        {
-            query.first();
-            id = query.value(0).toInt();
-        }
-        else SQLError();    // błąd wykonania zapytania
-    }
-    else SQLError();    // błąd otwarcia bazy danych
-    //
-
-    // Wypełnia listę
-    QSqlQuery query;
-
-    query.prepare("select * from subcategories where id_category = :id");
-    query.bindValue(":id", id);
-
-    FillListWidget(query, ui->SubcategoryListWidget);
-    ui->stackedWidget_2->setCurrentIndex(SUBCATEGORY_PAGE);
-    ui->BackPushButton->setEnabled(true);
-    db.close();
 }
 
 void MainWindow::on_LogOutPushButton_clicked()
@@ -122,83 +90,52 @@ void MainWindow::on_BackPushButton_clicked()
     if(ui->stackedWidget_2->currentIndex() == CATEGORY_PAGE) ui->BackPushButton->setEnabled(false);
 }
 
-void MainWindow::on_SubcategoryListWidget_itemClicked(QListWidgetItem *item)
+void MainWindow::on_CategoryListView_clicked(const QModelIndex &index)
 {
-    // Znajduje id danej podkategorii
-    int id;
+    // Wypełnia listę podkategorii
 
-    if(db.open())
-    {
-        QSqlQuery query;
+    QSqlRecord record = qModelCategory->record(index.row());
+    QString cat_str = record.field(0).value().toString();
 
-        query.prepare("select id from subcategories where name = :name");
-        query.bindValue(":name", item->text());
+    qModelSubcategory->setQuery("select name from subcategories "
+                                "where id_category = (select id from categories where name = '" + cat_str + "')");
 
-        if(query.exec())
-        {
-            query.first();
-            id = query.value(0).toInt();
-        }
-        else SQLError();    // błąd wykonania zapytania
-    }
-    else SQLError();    // błąd otwarcia bazy danych
-    //
+    ui->stackedWidget_2->setCurrentIndex(SUBCATEGORY_PAGE);
+    ui->BackPushButton->setEnabled(true);
+}
 
-    // Wypełnia listę przedmiotami
-    QSqlQuery query;
+void MainWindow::on_SubcategoryListView_clicked(const QModelIndex &index)
+{
+    QSqlRecord record = qModelSubcategory->record(index.row());
+    QString subcat_str = record.field(0).value().toString();
 
-    query.prepare("select it.name from items it, info inf, categories cat, subcategories subcat "
-                  "where it.id_info = inf.id and inf.id_category = cat.id and inf.id_subcategory = subcat.id and inf.id_subcategory = :id");
-                  // zrobić ładniejsze zapytanie
-    query.bindValue(":id", id);
-
-    FillListWidget(query, ui->ItemsListWidget);
-
-    db.close();
+    qModelItems->setQuery("select it.name as 'Nazwa', it.price as 'Cena' "
+                          "from items it, info inf, categories cat, subcategories subcat "
+                          "where it.id_info = inf.id and inf.id_category = cat.id and inf.id_subcategory = subcat.id and "
+                          "inf.id_subcategory = (select id from subcategories where name = '" + subcat_str + "')");
 
     ui->stackedWidget_2->setCurrentIndex(ITEMS_PAGE);
     ui->BackPushButton->setEnabled(true);
 }
 
-void MainWindow::on_ItemsListWidget_itemClicked(QListWidgetItem *item)
+void MainWindow::on_ItemsTreeView_clicked(const QModelIndex &index)
 {
-    // Znajduje id danego przedmiotu
-    int id;
-
-    if(db.open())
-    {
-        QSqlQuery query;
-
-        query.prepare("select id from items where name = :name");
-        query.bindValue(":name", item->text());
-
-        if(query.exec())
-        {
-            query.first();
-            id = query.value(0).toInt();
-        }
-        else SQLError();    // błąd wykonania zapytania
-    }
-    else SQLError();    // błąd otwarcia bazy danych
-    //
+    QSqlRecord record = qModelItems->record(index.row());
+    QString item_str = record.field(0).value().toString();
 
     // Wyświetla przedmiot
+
     QSqlQuery query;
-
     query.prepare("select it.name, it.price, inf.model, inf.producent from items it, info inf "
-                  "where it.id_info = inf.id and it.id = :id");
+                  "where it.id_info = inf.id and it.id = (select id from items where name = '" + item_str + "')");
                   // zrobić ładniejsze zapytanie
-    query.bindValue(":id", id);
-
     query.exec();
 
     query.first();
-    QString nameLabel = query.value(query.record().indexOf("name")).toString();
-    int priceLabel = query.value(query.record().indexOf("price")).toInt();
-    QString modelLabel = query.value(query.record().indexOf("model")).toString();
-    QString producentLabel = query.value(query.record().indexOf("producent")).toString();
-
-    db.close();
+    QString nameLabel = query.value(0).toString();
+    int priceLabel = query.value(1).toInt();
+    QString modelLabel = query.value(2).toString();
+    QString producentLabel = query.value(3).toString();
 
     ui->ItemNameLabel->setText(nameLabel);
     ui->ModelLabel->setText(modelLabel);
@@ -211,71 +148,68 @@ void MainWindow::on_ItemsListWidget_itemClicked(QListWidgetItem *item)
 
 void MainWindow::on_AdminPanelPushButton_clicked()
 {
-    adminwindow *w = new adminwindow;
+    adminwindow *w = new adminwindow;   // wyświetla panel admina
     w->show();
 }
 
 void MainWindow::on_SearchLineEdit_editingFinished()
 {
-    if(db.open())
+    QSqlQuery query;
+
+    if(ui->SearchLineEdit->text() == "")
     {
-        QSqlQuery query;
-
-        if(ui->SearchLineEdit->text() == "")
-        {
-            ui->stackedWidget_2->setCurrentIndex(CATEGORY_PAGE);
-            ui->BackPushButton->setEnabled(false);
-        }
-        else
-        {
-            query.prepare("select name from items where name like '%" + ui->SearchLineEdit->text() + "%'");
-            ui->stackedWidget_2->setCurrentIndex(ITEMS_PAGE);
-            FillListWidget(query, ui->ItemsListWidget);
-            ui->BackPushButton->setEnabled(true);
-        }
-
-        db.close();
+        ui->stackedWidget_2->setCurrentIndex(CATEGORY_PAGE);
+        ui->BackPushButton->setEnabled(false);
     }
-    else SQLError();
+    else
+    {
+        qModelItems->setQuery("select name from items where name like '%" + ui->SearchLineEdit->text() + "%'");
+
+        ui->stackedWidget_2->setCurrentIndex(ITEMS_PAGE);
+        ui->BackPushButton->setEnabled(true);
+    }
 }
 
 void MainWindow::on_BuyPushButton_clicked()
 {
-    if(db.open())
+    QSqlQuery query;
+
+    query.prepare("insert into orders values( "
+                  "(select id from users where login = '" + us->getLogin() + "'), "
+                  "(select id from items where name = '" + ui->ItemNameLabel->text() + "'), "
+                  "(select adress from users where login = '" + us->getLogin() + "'))");
+
+    if(query.exec())    // dodaj do zamówień
     {
-        QSqlQuery query;
+        query.prepare("select w.quantity from warehouse w, items i where i.id = w.id_item and i.name = '" + ui->ItemNameLabel->text() + "'");
 
-        query.prepare("insert into orders values( "
-                      "(select id from users where login = '" + us->getLogin() + "'), "
-                      "(select id from items where name = '" + ui->ItemNameLabel->text() + "'), "
-                      "(select adress from users where login = '" + us->getLogin() + "'))");
-
-        if(query.exec())    // dodaj do zamówień
+        int q;
+        if(query.exec())    // znajdź obecną ilość przedmiotu w magazynie
         {
-            query.prepare("select w.quantity from warehouse w, items i where i.id = w.id_item and i.name = '" + ui->ItemNameLabel->text() + "'");
-
-            int q;
-            if(query.exec())    // znajdź obecną ilość przedmiotu w magazynie
-            {
-                query.first();
-                q = query.value(0).toInt() - 1;
-            }
-            else SQLError();
-
-            query.prepare("update warehouse set quantity = :q where id_item = (select name from items where name = '" + ui->ItemNameLabel->text() + "')");
-            query.bindValue(":q", q);
-            if(!query.exec()) SQLError();   // dekrementuj ilość
-
-            SQLError("Kupiono pomyślnie przedmiot");
+            query.first();
+            q = query.value(0).toInt() - 1;
         }
         else SQLError();
 
-        db.close();
+        query.prepare("update warehouse set quantity = :q where id_item = (select name from items where name = '" + ui->ItemNameLabel->text() + "')");
+        query.bindValue(":q", q);
+        if(!query.exec()) SQLError();   // dekrementuj ilość
+
+        SQLError("Kupiono pomyślnie przedmiot");
     }
     else SQLError();
 }
 
 void MainWindow::on_OrdersPushButton_clicked()
 {
+    OrdersWindow *w = new OrdersWindow(us);
+    w->show();
+    w->InitOrders();
+}
 
+void MainWindow::on_BoughtPushButton_clicked()
+{
+    OrdersWindow *w = new OrdersWindow(us);
+    w->show();
+    w->InitBought();
 }

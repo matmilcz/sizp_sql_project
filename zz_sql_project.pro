@@ -27,14 +27,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    my_func.cpp \
     adminwindow.cpp \
-    my_func_admin.cpp
+    my_func_admin.cpp \
+    orderswindow.cpp \
+    my_func_main.cpp
 
 HEADERS += \
         mainwindow.h \
-    adminwindow.h
+    adminwindow.h \
+    orderswindow.h \
+    user.h
 
 FORMS += \
         mainwindow.ui \
-    adminwindow.ui
+    adminwindow.ui \
+    orderswindow.ui
