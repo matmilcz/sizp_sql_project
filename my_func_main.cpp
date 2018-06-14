@@ -91,10 +91,12 @@ void MainWindow::InitUserPanel()
     if(us->getRole() > 0)
     {
         ui->BoughtPushButton->setVisible(true);
+        ui->BuyPushButton->setVisible(true);
     }
     else
     {
         ui->BoughtPushButton->setVisible(false);
+        ui->BuyPushButton->setVisible(false);
     }
 }
 

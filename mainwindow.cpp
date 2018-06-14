@@ -191,7 +191,7 @@ void MainWindow::on_BuyPushButton_clicked()
         }
         else SQLError();
 
-        query.prepare("update warehouse set quantity = :q where id_item = (select name from items where name = '" + ui->ItemNameLabel->text() + "')");
+        query.prepare("update warehouse set quantity = :q where id_item = (select id from items where name = '" + ui->ItemNameLabel->text() + "')");
         query.bindValue(":q", q);
         if(!query.exec()) SQLError();   // dekrementuj ilość
 
@@ -212,4 +212,18 @@ void MainWindow::on_BoughtPushButton_clicked()
     OrdersWindow *w = new OrdersWindow(us);
     w->show();
     w->InitBought();
+}
+
+void MainWindow::on_FreeUserPushButton_clicked()
+{
+    us->ChangeUser("Free", "", "Free", "User", "", 0);
+
+    ui->stackedWidget->setCurrentIndex(SHOP_PAGE);  // przełącz na stronę sklepu
+
+    InitUserPanel();    // zainicjalizuj panel użytkownika
+
+    qModelCategory->setQuery("select name from categories");
+
+    ui->stackedWidget_2->setCurrentIndex(CATEGORY_PAGE);
+    ui->BackPushButton->setEnabled(false);
 }

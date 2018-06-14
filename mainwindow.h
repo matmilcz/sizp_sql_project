@@ -52,6 +52,8 @@ private slots:
 
     void on_BoughtPushButton_clicked();
 
+    void on_FreeUserPushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
